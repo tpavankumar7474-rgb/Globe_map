@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="utf-8">
-<title>Beautiful 3D OSM World Map</title>
+<title>3D OpenStreetMap Clean</title>
 
 <script src="https://cesium.com/downloads/cesiumjs/releases/1.110/Build/Cesium/Cesium.js"></script>
 <link href="https://cesium.com/downloads/cesiumjs/releases/1.110/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
@@ -13,56 +13,12 @@ html, body, #cesiumContainer {
   height:100%;
   margin:0;
   overflow:hidden;
-  font-family: Arial, sans-serif;
-}
-
-.panel {
-  position:absolute;
-  top:15px;
-  left:15px;
-  z-index:999;
-  background:rgba(255,255,255,0.94);
-  padding:12px;
-  border-radius:14px;
-  box-shadow:0 4px 16px rgba(0,0,0,0.25);
-  width:230px;
-}
-
-.panel h3 {
-  margin:0 0 10px;
-  font-size:16px;
-  color:#111;
-}
-
-.panel button {
-  width:100%;
-  margin:4px 0;
-  padding:8px;
-  border:0;
-  border-radius:8px;
-  background:#2563eb;
-  color:white;
-  font-weight:bold;
-  cursor:pointer;
-}
-
-.panel button:hover {
-  background:#1d4ed8;
 }
 </style>
 </head>
 
 <body>
 <div id="cesiumContainer"></div>
-
-<div class="panel">
-  <h3>3D OpenStreetMap</h3>
-  <button onclick="flyToDammam()">Dammam</button>
-  <button onclick="flyToKhobar()">Khobar</button>
-  <button onclick="flyToDhahran()">Dhahran</button>
-  <button onclick="flyToHyderabad()">Hyderabad</button>
-  <button onclick="toggleBuildings()">Show / Hide 3D Buildings</button>
-</div>
 
 <script>
 Cesium.Ion.defaultAccessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJjOWYyYjE5OS0yYTJhLTQzYjItOTM5ZS0xZDdiYjcxMDFiMTEiLCJpZCI6NDI0MDA2LCJpYXQiOjE3NzcyNjE2MTd9.NIO38ZbBzqKseoYD00j-Z1uCk6-QhqAa9HevYfTU4k8";
@@ -79,7 +35,7 @@ const viewer = new Cesium.Viewer("cesiumContainer", {
   selectionIndicator: true
 });
 
-// BEAUTIFUL + SHARP SETTINGS
+// SHARP + CLEAN SETTINGS
 viewer.resolutionScale = 1.0;
 viewer.scene.globe.maximumScreenSpaceError = 1.2;
 viewer.scene.fog.enabled = false;
@@ -88,20 +44,15 @@ viewer.scene.highDynamicRange = false;
 viewer.scene.skyAtmosphere.show = true;
 viewer.scene.globe.depthTestAgainstTerrain = false;
 
+// REMOVE DEFAULT
 viewer.imageryLayers.removeAll();
 
-// OPENSTREETMAP STYLE BASE MAP
-const osmLayer = viewer.imageryLayers.addImageryProvider(
+// OPENSTREETMAP BASE (NO BLUE SATELLITE)
+viewer.imageryLayers.addImageryProvider(
   new Cesium.OpenStreetMapImageryProvider({
     url: "https://a.tile.openstreetmap.org/"
   })
 );
-
-osmLayer.alpha = 1.0;
-osmLayer.brightness = 1.08;
-osmLayer.contrast = 1.12;
-osmLayer.saturation = 1.15;
-osmLayer.gamma = 1.0;
 
 // TERRAIN
 (async function () {
@@ -109,12 +60,9 @@ osmLayer.gamma = 1.0;
 })();
 
 // 3D BUILDINGS
-let buildings = null;
-let buildingsVisible = true;
-
 (async function () {
   try {
-    buildings = await Cesium.createOsmBuildingsAsync();
+    const buildings = await Cesium.createOsmBuildingsAsync();
     buildings.maximumScreenSpaceError = 4;
     viewer.scene.primitives.add(buildings);
   } catch (err) {
@@ -122,13 +70,7 @@ let buildingsVisible = true;
   }
 })();
 
-function toggleBuildings() {
-  if (!buildings) return;
-  buildingsVisible = !buildingsVisible;
-  buildings.show = buildingsVisible;
-}
-
-// NICE CITY MARKER
+// CITY MARKERS
 function addCity(name, lon, lat, color) {
   viewer.entities.add({
     name: name,
@@ -155,13 +97,13 @@ function addCity(name, lon, lat, color) {
   });
 }
 
-// SAMPLE CITY NAMES
+// ADD CITIES
 addCity("Dammam", 50.09, 26.42, Cesium.Color.YELLOW);
 addCity("Khobar", 50.20, 26.27, Cesium.Color.CYAN);
 addCity("Dhahran", 50.08, 26.23, Cesium.Color.LIME);
 addCity("Hyderabad", 78.48, 17.38, Cesium.Color.RED);
 
-// SAMPLE LANDMARK / MALL MARKERS
+// LANDMARKS
 function addLandmark(name, lon, lat) {
   viewer.entities.add({
     name: name,
@@ -186,42 +128,20 @@ function addLandmark(name, lon, lat) {
   });
 }
 
+// ADD MALLS
 addLandmark("Al Rashid Mall", 50.1880, 26.2867);
 addLandmark("Dhahran Mall", 50.1499, 26.3046);
-addLandmark("Marina Mall Dammam", 50.1189, 26.4628);
-addLandmark("Othaim Mall", 50.0801, 26.4207);
-
-// CAMERA
-function flyTo(lon, lat, height) {
-  viewer.camera.flyTo({
-    destination: Cesium.Cartesian3.fromDegrees(lon, lat, height),
-    orientation: {
-      heading: Cesium.Math.toRadians(0),
-      pitch: Cesium.Math.toRadians(-50),
-      roll: 0
-    },
-    duration: 2
-  });
-}
-
-function flyToDammam() {
-  flyTo(50.09, 26.42, 2500);
-}
-
-function flyToKhobar() {
-  flyTo(50.20, 26.27, 2200);
-}
-
-function flyToDhahran() {
-  flyTo(50.08, 26.23, 2200);
-}
-
-function flyToHyderabad() {
-  flyTo(78.48, 17.38, 3000);
-}
+addLandmark("Marina Mall", 50.1189, 26.4628);
 
 // DEFAULT VIEW
-flyToDammam();
+viewer.camera.flyTo({
+  destination: Cesium.Cartesian3.fromDegrees(50.09, 26.42, 2500),
+  orientation: {
+    heading: 0,
+    pitch: Cesium.Math.toRadians(-50),
+    roll: 0
+  }
+});
 </script>
 </body>
 </html>
