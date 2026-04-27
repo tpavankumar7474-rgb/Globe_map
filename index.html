@@ -2,17 +2,17 @@
 <html>
 <head>
 <meta charset="utf-8">
-<title>3D OpenStreetMap Clean</title>
+<title>Clean 3D OpenStreetMap</title>
 
 <script src="https://cesium.com/downloads/cesiumjs/releases/1.110/Build/Cesium/Cesium.js"></script>
 <link href="https://cesium.com/downloads/cesiumjs/releases/1.110/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
 
 <style>
 html, body, #cesiumContainer {
-  width:100%;
-  height:100%;
-  margin:0;
-  overflow:hidden;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
 }
 </style>
 </head>
@@ -27,15 +27,16 @@ const viewer = new Cesium.Viewer("cesiumContainer", {
   animation: false,
   timeline: false,
   baseLayerPicker: false,
-  geocoder: true,
-  sceneModePicker: true,
+  geocoder: false,
+  sceneModePicker: false,
   navigationHelpButton: false,
-  fullscreenButton: true,
-  infoBox: true,
-  selectionIndicator: true
+  fullscreenButton: false,
+  homeButton: false,
+  infoBox: false,
+  selectionIndicator: false
 });
 
-// SHARP + CLEAN SETTINGS
+// CLEAN + SHARP SETTINGS
 viewer.resolutionScale = 1.0;
 viewer.scene.globe.maximumScreenSpaceError = 1.2;
 viewer.scene.fog.enabled = false;
@@ -44,10 +45,10 @@ viewer.scene.highDynamicRange = false;
 viewer.scene.skyAtmosphere.show = true;
 viewer.scene.globe.depthTestAgainstTerrain = false;
 
-// REMOVE DEFAULT
+// REMOVE DEFAULT CESIUM IMAGERY
 viewer.imageryLayers.removeAll();
 
-// OPENSTREETMAP BASE (NO BLUE SATELLITE)
+// OPENSTREETMAP BASE MAP
 viewer.imageryLayers.addImageryProvider(
   new Cesium.OpenStreetMapImageryProvider({
     url: "https://a.tile.openstreetmap.org/"
@@ -59,88 +60,26 @@ viewer.imageryLayers.addImageryProvider(
   viewer.terrainProvider = await Cesium.CesiumTerrainProvider.fromIonAssetId(1);
 })();
 
-// 3D BUILDINGS
+// 3D OSM BUILDINGS ONLY
 (async function () {
   try {
     const buildings = await Cesium.createOsmBuildingsAsync();
     buildings.maximumScreenSpaceError = 4;
     viewer.scene.primitives.add(buildings);
   } catch (err) {
-    console.error("Buildings failed:", err);
+    console.error("3D buildings failed:", err);
   }
 })();
 
-// CITY MARKERS
-function addCity(name, lon, lat, color) {
-  viewer.entities.add({
-    name: name,
-    position: Cesium.Cartesian3.fromDegrees(lon, lat, 900),
-    point: {
-      pixelSize: 16,
-      color: color,
-      outlineColor: Cesium.Color.WHITE,
-      outlineWidth: 4,
-      disableDepthTestDistance: Number.POSITIVE_INFINITY
-    },
-    label: {
-      text: name,
-      font: "bold 22px Arial",
-      fillColor: color,
-      outlineColor: Cesium.Color.BLACK,
-      outlineWidth: 5,
-      style: Cesium.LabelStyle.FILL_AND_OUTLINE,
-      pixelOffset: new Cesium.Cartesian2(0, -38),
-      verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
-      disableDepthTestDistance: Number.POSITIVE_INFINITY,
-      scaleByDistance: new Cesium.NearFarScalar(1000, 1.2, 9000000, 0.65)
-    }
-  });
-}
-
-// ADD CITIES
-// addCity("Dammam", 50.09, 26.42, Cesium.Color.YELLOW);
-// addCity("Khobar", 50.20, 26.27, Cesium.Color.CYAN);
-// addCity("Dhahran", 50.08, 26.23, Cesium.Color.LIME);
-// addCity("Hyderabad", 78.48, 17.38, Cesium.Color.RED);
-
-// LANDMARKS
-function addLandmark(name, lon, lat) {
-  viewer.entities.add({
-    name: name,
-    position: Cesium.Cartesian3.fromDegrees(lon, lat, 500),
-    billboard: {
-      image: "https://cdn-icons-png.flaticon.com/512/854/854878.png",
-      width: 28,
-      height: 28,
-      disableDepthTestDistance: Number.POSITIVE_INFINITY
-    },
-    label: {
-      text: name,
-      font: "bold 15px Arial",
-      fillColor: Cesium.Color.WHITE,
-      outlineColor: Cesium.Color.BLACK,
-      outlineWidth: 4,
-      style: Cesium.LabelStyle.FILL_AND_OUTLINE,
-      pixelOffset: new Cesium.Cartesian2(0, -32),
-      disableDepthTestDistance: Number.POSITIVE_INFINITY,
-      distanceDisplayCondition: new Cesium.DistanceDisplayCondition(0, 35000)
-    }
-  });
-}
-
-// ADD MALLS
-// addLandmark("Al Rashid Mall", 50.1880, 26.2867);
-// addLandmark("Dhahran Mall", 50.1499, 26.3046);
-// addLandmark("Marina Mall", 50.1189, 26.4628);
-
-// DEFAULT VIEW
+// DEFAULT VIEW: DAMMAM / KHOBAR AREA
 viewer.camera.flyTo({
   destination: Cesium.Cartesian3.fromDegrees(50.09, 26.42, 2500),
   orientation: {
-    heading: 0,
+    heading: Cesium.Math.toRadians(0),
     pitch: Cesium.Math.toRadians(-50),
     roll: 0
-  }
+  },
+  duration: 2
 });
 </script>
 </body>
